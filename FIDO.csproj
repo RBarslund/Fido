@@ -137,6 +137,7 @@
     <Compile Include="Fido_Support\Objects\Carbon_Black\Object_CarbonBlack_Alert_Class.cs" />
     <Compile Include="Fido_Support\Objects\Carbon_Black\Object_CarbonBlack_Inventory_Class.cs" />
     <Compile Include="Fido_Support\Objects\Cyphort\Object_Cyphort_Class.cs" />
+    <Compile Include="Fido_Support\Objects\Object_Configs.cs" />
     <Compile Include="Fido_Support\Objects\OpenDNS\Object_OpenDNS_Configs.cs" />
     <Compile Include="Fido_Support\Objects\OpenDNS\Object_OpenDNS_DomainStatus.cs" />
     <Compile Include="Fido_Support\Objects\PaloAlto\Object_PaloAlto_Class.cs" />
