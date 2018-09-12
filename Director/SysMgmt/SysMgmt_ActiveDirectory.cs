@@ -31,20 +31,18 @@ namespace Fido_Main.Director.SysMgmt
     {
       try
       {
-        var lUserInfo = new UserReturnValues();
         var search = CreateDirectorySearcher(sUserId);
-        AddPropertiesToLoad(search);
-        ClearUserInfo(lUserInfo);        
+        var lUserInfo = CreateUserInfo();                
 
         var resultCol = search.FindAll();
-        if (!resultCol.PropertiesLoaded.Any() && resultCol == null) return lUserInfo;
+        if (ResultColIsNullOrEmpty(resultCol)) return lUserInfo;
 
         for (var counter = 0; counter < resultCol.Count; counter++)
         {
           var result = resultCol[counter];
           if (ResultHasFooProperties(result))
           {
-                UpdateLUserInfo(lUserInfo, result);            
+            UpdateLUserInfo(lUserInfo, result);            
           }
 
           if (string.IsNullOrEmpty(lUserInfo.ManagerName)) continue;
@@ -82,6 +80,22 @@ namespace Fido_Main.Director.SysMgmt
       }
       return null;
     }
+        
+        private static CreateDirectorySearcher(string sUserId)
+        {
+            var domainPath = Object_Fido_Configs.GetAsString("fido.ldap.basedn", string.Empty);
+            var user = Object_Fido_Configs.GetAsString("fido.ldap.userid", string.Empty);
+            var pwd = Object_Fido_Configs.GetAsString("fido.ldap.pwd", string.Empty);
+            var searchRoot = new DirectoryEntry(domainPath, user, pwd);
+            var search = new DirectorySearcher(searchRoot)
+            {
+                Filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName=" + sUserId + "))"
+            };
+
+            AddPropertiesToLoad(search);
+
+            return search;
+        }
 
         private static void AddPropertiesToLoad(DirectorySearcher search)
         {
@@ -99,8 +113,9 @@ namespace Fido_Main.Director.SysMgmt
             search.PropertiesToLoad.Add("mobile");
         }
 
-        private static void ClearUserInfo(UserReturnValues lUserÍnfo)
+        private static void GetUserInfo(UserReturnValues lUserÍnfo)
         {
+            var lUserInfo = new UserReturnValues();
             lUserInfo.UserEmail = string.Empty;
             lUserInfo.UserID = string.Empty;
             lUserInfo.Username = string.Empty;
@@ -117,18 +132,6 @@ namespace Fido_Main.Director.SysMgmt
             lUserInfo.ManagerMobile = string.Empty;
             lUserInfo.ManagerTitle = string.Empty;
             lUserInfo.ManagerName = string.Empty;
-        }
-
-        private static CreateDirectorySearcher(string sUserId)
-        {
-            var domainPath = Object_Fido_Configs.GetAsString("fido.ldap.basedn", string.Empty);
-            var user = Object_Fido_Configs.GetAsString("fido.ldap.userid", string.Empty);
-            var pwd = Object_Fido_Configs.GetAsString("fido.ldap.pwd", string.Empty);
-            var searchRoot = new DirectoryEntry(domainPath, user, pwd);
-            return new DirectorySearcher(searchRoot)
-            {
-                Filter = "(&(objectClass=user)(objectCategory=person)(sAMAccountName=" + sUserId + "))"
-            };
         }
 
         private static bool ResultHasFooProperties()
@@ -152,6 +155,12 @@ namespace Fido_Main.Director.SysMgmt
             if (result.Properties["streetAddress"].Count > 0) lUserInfo.StreetAddress = (String)result.Properties["streetAddress"][0] ?? string.Empty;
             if (result.Properties["mobile"].Count > 0) lUserInfo.MobileNumber = (String)result.Properties["mobile"][0] ?? string.Empty;
         }
+
+        private static void ResultColIsNullOrEmpty(ResultCol resultCol)
+        {
+            return !resultCol.PropertiesLoaded.Any() && resultCol == null;
+        }
+
     private static List<string> Getmanagerinfo(string sUserDN)
     {
       try
